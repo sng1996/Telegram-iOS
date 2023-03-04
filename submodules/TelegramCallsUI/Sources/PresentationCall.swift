@@ -489,9 +489,23 @@ public final class PresentationCallImpl: PresentationCall {
                 self.callWasActive = true
                 presentationState = PresentationCallState(state: .connecting(nil), videoState: mappedVideoState, remoteVideoState: mappedRemoteVideoState, remoteAudioState: mappedRemoteAudioState, remoteBatteryLevel: mappedRemoteBatteryLevel)
             case let .dropping(reason):
-                presentationState = PresentationCallState(state: .terminating(reason), videoState: mappedVideoState, remoteVideoState: .inactive, remoteAudioState: mappedRemoteAudioState, remoteBatteryLevel: mappedRemoteBatteryLevel)
+                let timestamp: Double
+                if let activeTimestamp = self.activeTimestamp {
+                    timestamp = activeTimestamp
+                } else {
+                    timestamp = CFAbsoluteTimeGetCurrent()
+                    self.activeTimestamp = timestamp
+                }
+                presentationState = PresentationCallState(state: .terminating(timestamp, reason), videoState: mappedVideoState, remoteVideoState: .inactive, remoteAudioState: mappedRemoteAudioState, remoteBatteryLevel: mappedRemoteBatteryLevel)
             case let .terminated(id, reason, options):
-                presentationState = PresentationCallState(state: .terminated(id, reason, self.callWasActive && (options.contains(.reportRating) || self.shouldPresentCallRating)), videoState: mappedVideoState, remoteVideoState: .inactive, remoteAudioState: mappedRemoteAudioState, remoteBatteryLevel: mappedRemoteBatteryLevel)
+                let timestamp: Double
+                if let activeTimestamp = self.activeTimestamp {
+                    timestamp = activeTimestamp
+                } else {
+                    timestamp = CFAbsoluteTimeGetCurrent()
+                    self.activeTimestamp = timestamp
+                }
+                presentationState = PresentationCallState(state: .terminated(timestamp, id, reason, self.callWasActive && (options.contains(.reportRating) || self.shouldPresentCallRating)), videoState: mappedVideoState, remoteVideoState: .inactive, remoteAudioState: mappedRemoteAudioState, remoteBatteryLevel: mappedRemoteBatteryLevel)
             case let .requesting(ringing):
                 presentationState = PresentationCallState(state: .requesting(ringing), videoState: mappedVideoState, remoteVideoState: mappedRemoteVideoState, remoteAudioState: mappedRemoteAudioState, remoteBatteryLevel: mappedRemoteBatteryLevel)
             case let .active(_, _, keyVisualHash, _, _, _, _):
@@ -501,7 +515,14 @@ public final class PresentationCallImpl: PresentationCall {
                         case .initializing:
                             presentationState = PresentationCallState(state: .connecting(keyVisualHash), videoState: mappedVideoState, remoteVideoState: mappedRemoteVideoState, remoteAudioState: mappedRemoteAudioState, remoteBatteryLevel: mappedRemoteBatteryLevel)
                         case .failed:
-                            presentationState = PresentationCallState(state: .terminating(.error(.disconnected)), videoState: mappedVideoState, remoteVideoState: mappedRemoteVideoState, remoteAudioState: mappedRemoteAudioState, remoteBatteryLevel: mappedRemoteBatteryLevel)
+                            let timestamp: Double
+                            if let activeTimestamp = self.activeTimestamp {
+                                timestamp = activeTimestamp
+                            } else {
+                                timestamp = CFAbsoluteTimeGetCurrent()
+                                self.activeTimestamp = timestamp
+                            }
+                            presentationState = PresentationCallState(state: .terminating(timestamp, .error(.disconnected)), videoState: mappedVideoState, remoteVideoState: mappedRemoteVideoState, remoteAudioState: mappedRemoteAudioState, remoteBatteryLevel: mappedRemoteBatteryLevel)
                             self.callSessionManager.drop(internalId: self.internalId, reason: .disconnect, debugLog: .single(nil))
                         case .connected:
                             let timestamp: Double
@@ -680,7 +701,7 @@ public final class PresentationCallImpl: PresentationCall {
                             }
                         case .requesting(true):
                             tone = .ringing
-                        case let .terminated(_, reason, _):
+                        case let .terminated(_, _, reason, _):
                             if let reason = reason {
                                 switch reason {
                                     case let .ended(type):

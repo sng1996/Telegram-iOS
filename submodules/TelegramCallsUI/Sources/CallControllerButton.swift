@@ -78,14 +78,14 @@ final class CallControllerButtonItemNode: HighlightTrackingButtonNode {
     private(set) var currentContent: Content?
     private(set) var currentText: String = ""
     
-    init(largeButtonSize: CGFloat = 72.0) {
+    init(largeButtonSize: CGFloat = 72.0, style: UIBlurEffect.Style = .light) {
         self.largeButtonSize = largeButtonSize
         
         self.wrapperNode = ASDisplayNode()
         self.contentContainer = ASDisplayNode()
         
         self.effectView = UIVisualEffectView()
-        self.effectView.effect = UIBlurEffect(style: .light)
+        self.effectView.effect = UIBlurEffect(style: style)
         self.effectView.layer.cornerRadius = self.largeButtonSize / 2.0
         self.effectView.clipsToBounds = true
         self.effectView.isUserInteractionEnabled = false
@@ -137,6 +137,10 @@ final class CallControllerButtonItemNode: HighlightTrackingButtonNode {
     override func layout() {
         super.layout()
         self.wrapperNode.frame = self.bounds
+    }
+
+    func updateStyle(_ style: UIBlurEffect.Style) {
+        effectView.effect = UIBlurEffect(style: style)
     }
     
     func update(size: CGSize, content: Content, text: String, transition: ContainedViewLayoutTransition) {
@@ -243,7 +247,7 @@ final class CallControllerButtonItemNode: HighlightTrackingButtonNode {
                 case let .color(color):
                     switch color {
                     case .red:
-                        fillColor = UIColor(rgb: 0xd92326)
+                        fillColor = UIColor(rgb: 0xFF3B30)
                     case .green:
                         fillColor = UIColor(rgb: 0x74db58)
                     case let .custom(color, alpha):
@@ -279,9 +283,7 @@ final class CallControllerButtonItemNode: HighlightTrackingButtonNode {
                     image = generateTintedImage(image: UIImage(bundleImageName: "Call/CallHeadphonesButton"), color: imageColor)
                 case .accept:
                     image = generateTintedImage(image: UIImage(bundleImageName: "Call/CallAcceptButton"), color: imageColor)
-                case .end:
-                    image = generateTintedImage(image: UIImage(bundleImageName: "Call/CallDeclineButton"), color: imageColor)
-                case .cancel:
+                case .cancel, .end:
                     image = generateImage(CGSize(width: 28.0, height: 28.0), opaque: false, rotatedContext: { size, context in
                         let bounds = CGRect(origin: CGPoint(), size: size)
                         context.clear(bounds)

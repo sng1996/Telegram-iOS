@@ -50,8 +50,8 @@ public struct PresentationCallState: Equatable {
         case connecting(Data?)
         case active(Double, Int32?, Data)
         case reconnecting(Double, Int32?, Data)
-        case terminating(CallSessionTerminationReason?)
-        case terminated(CallId?, CallSessionTerminationReason?, Bool)
+        case terminating(Double, CallSessionTerminationReason?)
+        case terminated(Double, CallId?, CallSessionTerminationReason?, Bool)
     }
     
     public enum VideoState: Equatable {

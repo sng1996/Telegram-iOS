@@ -663,11 +663,11 @@ public final class SharedAccountContextImpl: SharedAccountContext {
             |> deliverOnMainQueue).start(next: { [weak self] call in
                 if let strongSelf = self {
                     if call !== strongSelf.callController?.call {
-                        strongSelf.callController?.dismiss()
-                        strongSelf.callController = nil
-                        strongSelf.hasOngoingCall.set(false)
-                        
                         if let call = call {
+                            strongSelf.callController?.dismiss()
+                            strongSelf.callController = nil
+                            strongSelf.hasOngoingCall.set(false)
+
                             mainWindow.hostView.containerView.endEditing(true)
                             let callController = CallController(sharedContext: strongSelf, account: call.context.account, call: call, easyDebugAccess: !GlobalExperimentalSettings.isAppStoreBuild)
                             strongSelf.callController = callController

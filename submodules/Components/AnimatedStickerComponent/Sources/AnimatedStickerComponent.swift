@@ -59,7 +59,7 @@ public final class AnimatedStickerComponent: Component {
     
     public final class View: UIView {
         private var component: AnimatedStickerComponent?
-        private var animationNode: AnimatedStickerNode?
+        public var animationNode: AnimatedStickerNode?
         
         private let hierarchyTrackingLayer: HierarchyTrackingLayer
         private var isInHierarchy: Bool = false
